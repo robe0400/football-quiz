@@ -1,123 +1,168 @@
-/* Previous CSS remains the same until the players section */
-
-/* Players and field animation styles */
-#players-container {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    transition: left 1s ease-in-out;
+#game-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
 }
 
+/* Football field styling */
+#field-container {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+#football-field {
+    display: flex;
+    width: 100%;
+    height: 300px;
+    background-color: #458545;
+    border: 2px solid white;
+    position: relative;
+    overflow: hidden;
+}
+
+.endzone {
+    width: 10%;
+    height: 100%;
+    background-color: #2d592d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.endzone-text {
+    color: white;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#playing-field {
+    width: 80%;
+    height: 100%;
+    position: relative;
+}
+
+/* Yard lines */
+.yard-line {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background-color: white;
+}
+
+.yard-line span {
+    color: white;
+    position: absolute;
+    top: 5px;
+    font-size: 12px;
+}
+
+.yard-line[data-yard="10"] { left: 10%; }
+.yard-line[data-yard="20"] { left: 20%; }
+.yard-line[data-yard="30"] { left: 30%; }
+.yard-line[data-yard="40"] { left: 40%; }
+.yard-line[data-yard="50"] { left: 50%; }
+/* Mirrored yard lines */
+.yard-line[data-yard="40"]:nth-of-type(6) { left: 60%; }
+.yard-line[data-yard="30"]:nth-of-type(7) { left: 70%; }
+.yard-line[data-yard="20"]:nth-of-type(8) { left: 80%; }
+.yard-line[data-yard="10"]:nth-of-type(9) { left: 90%; }
+
+/* Players container */
+#players-container {
+    position: absolute;
+    width: 100px;
+    height: 100%;
+    transition: left 1s ease-in-out;
+    left: 20%;
+}
+
+/* Players styling */
 .player {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     position: absolute;
-    transition: all 0.5s ease-in-out;
+    transition: all 0.3s ease-in-out;
 }
 
-/* Formation classes */
-.formation-spread {
-    transform: scale(1.2);
-}
-
-.formation-bunch {
-    transform: scale(0.8);
-}
-
-/* Player movement animations */
-@keyframes celebrateTouchdown {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.3) rotate(180deg); }
-    100% { transform: scale(1) rotate(360deg); }
-}
-
-@keyframes tackled {
-    0% { transform: scale(1) rotate(0deg); }
-    25% { transform: scale(0.8) rotate(-45deg); }
-    75% { transform: scale(0.8) rotate(45deg); }
-    100% { transform: scale(1) rotate(0deg); }
-}
-
-@keyframes firstDown {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2) translateY(-10px); }
-    100% { transform: scale(1) translateY(0); }
-}
-
-/* Offensive players with enhanced styling */
+/* Offensive team */
 #offensive-team {
-    position: absolute;
-    width: 150px;
+    position: relative;
     height: 100%;
-    transition: all 0.5s ease-in-out;
 }
 
 .offense-qb {
     background-color: red;
     left: 0;
-    top: 50%;
-    z-index: 2;
+    top: 45%;
 }
 
 .offense-rb {
-    background-color: #ff4444;
+    background-color: red;
     left: 20px;
-    top: 40%;
-    z-index: 2;
+    top: 35%;
 }
 
 .offense-wr {
-    background-color: #ff6666;
-    left: 40px;
-    top: 30%;
-    z-index: 2;
+    background-color: red;
+    left: 30px;
+    top: 25%;
 }
 
 .offense-ol {
-    background-color: #ff8888;
-    z-index: 1;
+    background-color: red;
+    left: 10px;
 }
 
-/* Defensive players with enhanced styling */
+.offense-ol:nth-of-type(4) { top: 55%; }
+.offense-ol:nth-of-type(5) { top: 65%; }
+
+/* Defensive team */
 #defensive-team {
     position: absolute;
-    width: 150px;
     height: 100%;
-    transition: all 0.5s ease-in-out;
+    left: 60px;
 }
 
 .defense-dl {
     background-color: blue;
-    right: 0;
-    top: 50%;
-    z-index: 2;
+    top: 45%;
 }
 
 .defense-lb {
-    background-color: #4444ff;
-    right: 20px;
-    top: 40%;
-    z-index: 2;
+    background-color: blue;
+    top: 35%;
 }
 
 .defense-db {
-    background-color: #6666ff;
-    right: 40px;
-    top: 30%;
-    z-index: 2;
+    background-color: blue;
+    top: 25%;
 }
 
-/* Ball styling and animation */
+/* Ball sprite */
 #ball-sprite {
     width: 12px;
     height: 18px;
     background-color: #8B4513;
     border-radius: 40% 40% 50% 50%;
     position: absolute;
+    left: 45%;
+    top: 45%;
     transform: rotate(-45deg);
-    z-index: 3;
-    transition: all 0.5s ease-in-out;
+}
+
+/* Animation classes */
+.play-action {
+    transform: scale(1.2);
+    transition: transform 0.3s ease-in-out;
+}
+
+.ball-snap {
+    animation: spin 0.5s linear;
 }
 
 @keyframes spin {
@@ -125,39 +170,42 @@
     to { transform: rotate(315deg); }
 }
 
-/* Play result animations */
-.touchdown-celebration {
-    animation: celebrateTouchdown 1.5s ease-in-out;
+/* Scoreboard */
+#scoreboard {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    margin-top: 10px;
+    display: flex;
+    justify-content: space-around;
+    font-family: monospace;
+    border-radius: 5px;
 }
 
-.player-tackled {
-    animation: tackled 1s ease-in-out;
+/* Question container */
+#question-container {
+    margin: 20px 0;
+    text-align: center;
 }
 
-.first-down-celebration {
-    animation: firstDown 1s ease-in-out;
+#question-text {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-.ball-snap {
-    animation: spin 0.5s linear;
+/* Answer buttons */
+#answers-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-/* Field position indicator */
-#field-position-marker {
-    position: absolute;
-    width: 2px;
-    height: 100%;
-    background-color: rgba(255, 255, 0, 0.5);
-    transition: left 1s ease-in-out;
-    pointer-events: none;
-}
-
-/* First down marker */
-#first-down-marker {
-    position: absolute;
-    width: 2px;
-    height: 100%;
-    background-color: rgba(255, 255, 0, 0.5);
-    transition: left 1s ease-in-out;
-    pointer-events: none;
-}
+.answer-btn {
+    padding: 15px;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    background-color
