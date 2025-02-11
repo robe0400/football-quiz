@@ -1,92 +1,11 @@
-/* Main game container */
-#game-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-}
+/* Previous CSS remains the same until the players section */
 
-/* Football field styling */
-#field-container {
-    position: relative;
-    margin-bottom: 30px;
-}
-
-#football-field {
-    display: flex;
-    width: 100%;
-    height: 300px;
-    background-color: #458545;
-    border: 2px solid white;
-    position: relative;
-}
-
-.endzone {
-    width: 10%;
-    height: 100%;
-    background-color: #2d592d;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.endzone-text {
-    color: white;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
-    font-size: 24px;
-    font-weight: bold;
-}
-
-#playing-field {
-    width: 80%;
-    height: 100%;
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-}
-
-/* Yard lines */
-.yard-line {
-    position: absolute;
-    width: 2px;
-    height: 100%;
-    background-color: white;
-    display: flex;
-    justify-content: center;
-}
-
-.yard-line span {
-    color: white;
-    position: absolute;
-    top: 5px;
-    font-size: 12px;
-}
-
-.yard-line[data-yard="10"] { left: 10%; }
-.yard-line[data-yard="20"] { left: 20%; }
-.yard-line[data-yard="30"] { left: 30%; }
-.yard-line[data-yard="40"] { left: 40%; }
-.yard-line[data-yard="50"] { left: 50%; }
-/* Mirrored yard lines for other half */
-.yard-line[data-yard="40"]:nth-of-type(6) { left: 60%; }
-.yard-line[data-yard="30"]:nth-of-type(7) { left: 70%; }
-.yard-line[data-yard="20"]:nth-of-type(8) { left: 80%; }
-.yard-line[data-yard="10"]:nth-of-type(9) { left: 90%; }
-
-/* Hash marks */
-#hash-marks {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-}
-
-/* Players styling */
+/* Players and field animation styles */
 #players-container {
     position: absolute;
     width: 100%;
     height: 100%;
+    transition: left 1s ease-in-out;
 }
 
 .player {
@@ -94,169 +13,151 @@
     height: 20px;
     border-radius: 50%;
     position: absolute;
+    transition: all 0.5s ease-in-out;
 }
 
-/* Offensive players */
+/* Formation classes */
+.formation-spread {
+    transform: scale(1.2);
+}
+
+.formation-bunch {
+    transform: scale(0.8);
+}
+
+/* Player movement animations */
+@keyframes celebrateTouchdown {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+@keyframes tackled {
+    0% { transform: scale(1) rotate(0deg); }
+    25% { transform: scale(0.8) rotate(-45deg); }
+    75% { transform: scale(0.8) rotate(45deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes firstDown {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2) translateY(-10px); }
+    100% { transform: scale(1) translateY(0); }
+}
+
+/* Offensive players with enhanced styling */
 #offensive-team {
     position: absolute;
-    left: 40%;
-    width: 100px;
+    width: 150px;
     height: 100%;
+    transition: all 0.5s ease-in-out;
 }
 
 .offense-qb {
     background-color: red;
     left: 0;
     top: 50%;
+    z-index: 2;
 }
 
 .offense-rb {
-    background-color: red;
+    background-color: #ff4444;
     left: 20px;
     top: 40%;
+    z-index: 2;
 }
 
 .offense-wr {
-    background-color: red;
+    background-color: #ff6666;
     left: 40px;
     top: 30%;
+    z-index: 2;
 }
 
 .offense-ol {
-    background-color: red;
-    left: 10px;
-    top: 60%;
+    background-color: #ff8888;
+    z-index: 1;
 }
 
-/* Defensive players */
+/* Defensive players with enhanced styling */
 #defensive-team {
     position: absolute;
-    left: 50%;
-    width: 100px;
+    width: 150px;
     height: 100%;
+    transition: all 0.5s ease-in-out;
 }
 
 .defense-dl {
     background-color: blue;
     right: 0;
     top: 50%;
+    z-index: 2;
 }
 
 .defense-lb {
-    background-color: blue;
+    background-color: #4444ff;
     right: 20px;
     top: 40%;
+    z-index: 2;
 }
 
 .defense-db {
-    background-color: blue;
+    background-color: #6666ff;
     right: 40px;
     top: 30%;
+    z-index: 2;
 }
 
-/* Ball sprite */
+/* Ball styling and animation */
 #ball-sprite {
-    width: 10px;
-    height: 16px;
-    background-color: brown;
-    border-radius: 5px;
+    width: 12px;
+    height: 18px;
+    background-color: #8B4513;
+    border-radius: 40% 40% 50% 50%;
     position: absolute;
-    left: 45%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    transform: rotate(-45deg);
+    z-index: 3;
+    transition: all 0.5s ease-in-out;
 }
 
-/* Scoreboard */
-#scoreboard {
-    background-color: #333;
-    color: white;
-    padding: 10px;
-    margin-top: 10px;
-    display: flex;
-    justify-content: space-around;
-    font-family: 'Digital', monospace;
-    border-radius: 5px;
+@keyframes spin {
+    from { transform: rotate(-45deg); }
+    to { transform: rotate(315deg); }
 }
 
-#scoreboard div {
-    text-align: center;
+/* Play result animations */
+.touchdown-celebration {
+    animation: celebrateTouchdown 1.5s ease-in-out;
 }
 
-/* Question container */
-#question-container {
-    margin: 20px 0;
-    text-align: center;
+.player-tackled {
+    animation: tackled 1s ease-in-out;
 }
 
-#question-text {
-    font-size: 24px;
-    margin-bottom: 20px;
-    color: #333;
-    min-height: 60px;
+.first-down-celebration {
+    animation: firstDown 1s ease-in-out;
 }
 
-/* Answer buttons */
-#answers-container {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    max-width: 600px;
-    margin: 0 auto;
+.ball-snap {
+    animation: spin 0.5s linear;
 }
 
-.answer-btn {
-    padding: 15px;
-    font-size: 18px;
-    border: none;
-    border-radius: 5px;
-    background-color: #4CAF50;
-    color: white;
-    cursor: pointer;
-    transition: background-color 0.3s;
+/* Field position indicator */
+#field-position-marker {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background-color: rgba(255, 255, 0, 0.5);
+    transition: left 1s ease-in-out;
+    pointer-events: none;
 }
 
-.answer-btn:hover {
-    background-color: #45a049;
-}
-
-/* Control buttons */
-#controls {
-    text-align: center;
-    margin-top: 20px;
-}
-
-#start-game, #read-question {
-    padding: 10px 20px;
-    font-size: 16px;
-    margin: 0 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-#start-game {
-    background-color: #2196F3;
-    color: white;
-}
-
-#read-question {
-    background-color: #FF9800;
-    color: white;
-}
-
-#start-game:hover {
-    background-color: #1976D2;
-}
-
-#read-question:hover {
-    background-color: #F57C00;
-}
-
-/* Error display */
-#error-display {
-    color: red;
-    padding: 10px;
-    margin: 10px;
-    text-align: center;
-    display: none;
+/* First down marker */
+#first-down-marker {
+    position: absolute;
+    width: 2px;
+    height: 100%;
+    background-color: rgba(255, 255, 0, 0.5);
+    transition: left 1s ease-in-out;
+    pointer-events: none;
 }
