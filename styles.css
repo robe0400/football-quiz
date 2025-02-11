@@ -208,4 +208,54 @@
     font-size: 18px;
     border: none;
     border-radius: 5px;
-    background-color
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.answer-btn:hover {
+    background-color: #45a049;
+}
+
+/* Control buttons */
+#controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+#start-game, #read-question {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#start-game {
+    background-color: #2196F3;
+    color: white;
+}
+
+#read-question {
+    background-color: #FF9800;
+    color: white;
+}
+
+#start-game:hover {
+    background-color: #1976D2;
+}
+
+#read-question:hover {
+    background-color: #F57C00;
+}
+
+/* Error display */
+#error-display {
+    color: red;
+    padding: 10px;
+    margin: 10px;
+    text-align: center;
+    display: none;
+}
