@@ -17,15 +17,6 @@ class NFLQuizGame {
         this.initializeEventListeners();
         this.initializeAnnouncer();
         this.updateDisplay();
-        this.checkAudioSupport();
-
-        // Add permission check for audio
-        if (window.speechSynthesis) {
-            // Try to speak a silent message to trigger permission prompt
-            const silentUtterance = new SpeechSynthesisUtterance('');
-            silentUtterance.volume = 0;
-            speechSynthesis.speak(silentUtterance);
-        }
     }
 
     initializeElements() {
@@ -81,14 +72,12 @@ class NFLQuizGame {
         voicesChanged();
     }
 
-    checkAudioSupport() {
-        const audioStatus = document.getElementById('audio-status');
-        if (!window.speechSynthesis) {
-            audioStatus.style.display = 'block';
-        }
-    }
-
     announce(text, callback = null) {
+        if (!window.speechSynthesis) {
+            if (callback) callback();
+            return;
+        }
+
         if (this.announcer.isAnnouncing) {
             speechSynthesis.cancel();
         }
@@ -104,7 +93,17 @@ class NFLQuizGame {
             if (callback) callback();
         };
 
-        speechSynthesis.speak(utterance);
+        utterance.onerror = () => {
+            this.announcer.isAnnouncing = false;
+            if (callback) callback();
+        };
+
+        try {
+            speechSynthesis.speak(utterance);
+        } catch (e) {
+            console.warn('Speech synthesis failed:', e);
+            if (callback) callback();
+        }
     }
 
     getGameSituation() {
@@ -156,6 +155,7 @@ class NFLQuizGame {
         
         this.startButton.style.display = 'none';
         this.readQuestionButton.style.display = 'block';
+        this.answerButtons.forEach(button => button.style.display = 'block');
     }
 
     displayQuestion() {
