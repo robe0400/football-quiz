@@ -43,4 +43,130 @@ class NFLQuizGame {
 
     initializeEventListeners() {
         this.startButton.addEventListener('click', () => this.startGame());
-        this.readQuestionButton.addEventListener
+        this.readQuestionButton.addEventListener('click', () => this.readCurrentQuestion());
+        
+        this.answerButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const answerIndex = parseInt(e.target.dataset.index);
+                this.checkAnswer(answerIndex);
+            });
+        });
+    }
+
+    startGame() {
+        this.currentQuestion = 0;
+        this.score = 0;
+        this.yards = 20;
+        this.currentDown = 1;
+        this.yardsToGo = 10;
+        this.fieldPosition = 20;
+        this.possession = true;
+        
+        this.updateDisplay();
+        this.displayQuestion();
+        
+        this.startButton.style.display = 'none';
+        this.readQuestionButton.style.display = 'block';
+    }
+
+    displayQuestion() {
+        if (this.currentQuestion >= questions.length) {
+            this.endGame();
+            return;
+        }
+
+        const question = questions[this.currentQuestion];
+        this.questionText.textContent = question.question;
+        
+        question.answers.forEach((answer, index) => {
+            this.answerButtons[index].textContent = answer;
+            this.answerButtons[index].disabled = false;
+        });
+
+        this.readCurrentQuestion();
+    }
+
+    readCurrentQuestion() {
+        if (this.isReadingQuestion) return;
+        
+        const question = questions[this.currentQuestion];
+        const text = question.question;
+        
+        // You can add text-to-speech here if desired
+        console.log("Reading question:", text);
+    }
+
+    checkAnswer(answerIndex) {
+        const question = questions[this.currentQuestion];
+        const isCorrect = answerIndex === question.correctAnswer;
+
+        if (isCorrect) {
+            this.handleCorrectAnswer();
+        } else {
+            this.handleIncorrectAnswer();
+        }
+
+        this.currentQuestion++;
+        setTimeout(() => this.displayQuestion(), 1500);
+    }
+
+    handleCorrectAnswer() {
+        // Gain yards
+        this.yards += 10;
+        this.fieldPosition += 10;
+        this.score += 7;
+        
+        if (this.fieldPosition >= 100) {
+            // Touchdown!
+            this.score += 7;
+            this.resetDrive();
+        } else {
+            this.yardsToGo -= 10;
+            if (this.yardsToGo <= 0) {
+                this.currentDown = 1;
+                this.yardsToGo = 10;
+            } else {
+                this.currentDown++;
+            }
+        }
+        
+        this.updateDisplay();
+        this.updateTeamPositions();
+    }
+
+    handleIncorrectAnswer() {
+        this.currentDown++;
+        if (this.currentDown > 4) {
+            this.resetDrive();
+        }
+        this.updateDisplay();
+    }
+
+    resetDrive() {
+        this.yards = 20;
+        this.fieldPosition = 20;
+        this.currentDown = 1;
+        this.yardsToGo = 10;
+        this.updateTeamPositions();
+    }
+
+    updateDisplay() {
+        this.scoreDisplay.textContent = this.score;
+        this.downDisplay.textContent = this.currentDown;
+        this.yardsToGoDisplay.textContent = this.yardsToGo;
+        this.fieldPositionDisplay.textContent = `Own ${this.fieldPosition}`;
+    }
+
+    endGame() {
+        this.questionText.textContent = `Game Over! Final Score: ${this.score}`;
+        this.answerButtons.forEach(button => button.style.display = 'none');
+        this.readQuestionButton.style.display = 'none';
+        this.startButton.style.display = 'block';
+        this.startButton.textContent = 'Play Again';
+    }
+}
+
+// Start the game when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    window.game = new NFLQuizGame();
+});
