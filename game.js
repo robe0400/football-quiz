@@ -9,8 +9,7 @@ class NFLQuizGame {
         this.possession = true;
         this.isReadingQuestion = false;
         
-        // Initialize sound manager
-        this.soundManager = new SoundManager();
+        // Remove sound manager initialization
         
         this.initializeElements();
         this.initializeEventListeners();
@@ -92,7 +91,7 @@ class NFLQuizGame {
         const question = questions[this.currentQuestion];
         const text = question.question;
         
-        // You can add text-to-speech here if desired
+        // Removed text-to-speech functionality
         console.log("Reading question:", text);
     }
 
