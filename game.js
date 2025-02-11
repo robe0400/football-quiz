@@ -17,10 +17,18 @@ class NFLQuizGame {
         this.initializeEventListeners();
         this.initializeAnnouncer();
         this.updateDisplay();
+        this.checkAudioSupport();
+
+        // Add permission check for audio
+        if (window.speechSynthesis) {
+            // Try to speak a silent message to trigger permission prompt
+            const silentUtterance = new SpeechSynthesisUtterance('');
+            silentUtterance.volume = 0;
+            speechSynthesis.speak(silentUtterance);
+        }
     }
 
     initializeElements() {
-        // ... (keep existing element initialization)
         this.questionText = document.getElementById('question-text');
         this.answerButtons = document.querySelectorAll('.answer-btn');
         this.startButton = document.getElementById('start-game');
@@ -37,13 +45,47 @@ class NFLQuizGame {
         this.updateTeamPositions();
     }
 
+    initializeEventListeners() {
+        this.startButton.addEventListener('click', () => this.startGame());
+        this.readQuestionButton.addEventListener('click', () => this.readCurrentQuestion());
+        this.answerButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (!this.isReadingQuestion) {
+                    const index = parseInt(button.dataset.index);
+                    this.checkAnswer(index);
+                }
+            });
+        });
+    }
+
     initializeAnnouncer() {
+        if (!window.speechSynthesis) {
+            console.warn('Speech synthesis not supported in this browser');
+            // Fallback to no audio
+            this.announce = (text, callback) => {
+                console.log('Would speak:', text);
+                if (callback) callback();
+            };
+            return;
+        }
+
         // Set up a deeper voice for the announcer if available
-        speechSynthesis.onvoiceschanged = () => {
+        const voicesChanged = () => {
             const voices = speechSynthesis.getVoices();
-            // Try to find a male voice for the announcer
             this.announcer.voice = voices.find(voice => voice.name.includes('Male')) || voices[0];
         };
+
+        speechSynthesis.onvoiceschanged = voicesChanged;
+        
+        // Initial voice load
+        voicesChanged();
+    }
+
+    checkAudioSupport() {
+        const audioStatus = document.getElementById('audio-status');
+        if (!window.speechSynthesis) {
+            audioStatus.style.display = 'block';
+        }
     }
 
     announce(text, callback = null) {
@@ -247,6 +289,10 @@ class NFLQuizGame {
         this.downDisplay.textContent = this.currentDown;
         this.yardsToGoDisplay.textContent = this.yardsToGo;
         this.fieldPositionDisplay.textContent = `Own ${this.fieldPosition}`;
+    }
+
+    updateTeamPositions() {
+        // Add your team position update logic here if needed
     }
 
     endGame() {
