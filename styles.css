@@ -11,6 +11,7 @@
     position: relative;
     display: flex;
     margin-bottom: 20px;
+    overflow: hidden;
 }
 
 .endzone {
@@ -35,6 +36,7 @@
     top: 50%;
     left: 50%;
     transform-origin: 0 0;
+    white-space: nowrap;
 }
 
 #playing-field {
@@ -72,6 +74,15 @@
     background-color: white;
     border-radius: 50%;
     position: absolute;
+    transform: translate(-50%, -50%);
+}
+
+#offensive-team .player {
+    background-color: #ff4444;
+}
+
+#defensive-team .player {
+    background-color: #4444ff;
 }
 
 #ball-sprite {
@@ -79,7 +90,7 @@
     height: 12px;
     background-color: brown;
     position: absolute;
-    left: 50%;
+    left: 0;
     top: 50%;
     transform: translate(-50%, -50%);
 }
@@ -91,6 +102,8 @@
     display: flex;
     justify-content: space-around;
     margin-bottom: 20px;
+    border-radius: 5px;
+    font-size: 1.1em;
 }
 
 #question-container {
@@ -103,6 +116,7 @@
     padding: 10px;
     background-color: #f0f0f0;
     border-radius: 5px;
+    min-height: 50px;
 }
 
 #answers-container {
@@ -119,6 +133,8 @@
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
+    min-height: 60px;
+    display: block;
 }
 
 .answer-btn:hover {
@@ -165,5 +181,14 @@
     
     #football-field {
         height: 200px;
+    }
+    
+    #question-text {
+        font-size: 1.1em;
+    }
+    
+    .answer-btn {
+        font-size: 0.9em;
+        padding: 10px;
     }
 }

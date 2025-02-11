@@ -292,7 +292,14 @@ class NFLQuizGame {
     }
 
     updateTeamPositions() {
-        // Add your team position update logic here if needed
+        if (this.playersContainer) {
+            // Convert field position to percentage
+            let position = this.fieldPosition;
+            // Adjust for the endzones (10% each)
+            position = (position / 100) * 80 + 10;
+            // Set the new position with a smooth transition
+            this.playersContainer.style.left = `${position}%`;
+        }
     }
 
     endGame() {

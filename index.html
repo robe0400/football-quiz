@@ -14,30 +14,28 @@
                     <div class="endzone-text">END ZONE</div>
                 </div>
                 <div id="playing-field">
-                    <div class="yard-line" data-yard="10"><span>10</span></div>
-                    <div class="yard-line" data-yard="20"><span>20</span></div>
-                    <div class="yard-line" data-yard="30"><span>30</span></div>
-                    <div class="yard-line" data-yard="40"><span>40</span></div>
-                    <div class="yard-line" data-yard="50"><span>50</span></div>
-                    <div class="yard-line" data-yard="40"><span>40</span></div>
-                    <div class="yard-line" data-yard="30"><span>30</span></div>
-                    <div class="yard-line" data-yard="20"><span>20</span></div>
-                    <div class="yard-line" data-yard="10"><span>10</span></div>
-
-                    <div id="hash-marks"></div>
+                    <div class="yard-line" style="left: 10%"><span>10</span></div>
+                    <div class="yard-line" style="left: 20%"><span>20</span></div>
+                    <div class="yard-line" style="left: 30%"><span>30</span></div>
+                    <div class="yard-line" style="left: 40%"><span>40</span></div>
+                    <div class="yard-line" style="left: 50%"><span>50</span></div>
+                    <div class="yard-line" style="left: 60%"><span>40</span></div>
+                    <div class="yard-line" style="left: 70%"><span>30</span></div>
+                    <div class="yard-line" style="left: 80%"><span>20</span></div>
+                    <div class="yard-line" style="left: 90%"><span>10</span></div>
 
                     <div id="players-container">
                         <div id="offensive-team">
-                            <div class="player offense-qb"></div>
-                            <div class="player offense-rb"></div>
-                            <div class="player offense-wr"></div>
-                            <div class="player offense-ol"></div>
-                            <div class="player offense-ol"></div>
+                            <div class="player offense-qb" style="left: 0; top: 50%"></div>
+                            <div class="player offense-rb" style="left: -10px; top: 60%"></div>
+                            <div class="player offense-wr" style="left: 20px; top: 20%"></div>
+                            <div class="player offense-ol" style="left: -5px; top: 40%"></div>
+                            <div class="player offense-ol" style="left: -5px; top: 60%"></div>
                         </div>
                         <div id="defensive-team">
-                            <div class="player defense-dl"></div>
-                            <div class="player defense-lb"></div>
-                            <div class="player defense-db"></div>
+                            <div class="player defense-dl" style="left: 30px; top: 45%"></div>
+                            <div class="player defense-lb" style="left: 45px; top: 50%"></div>
+                            <div class="player defense-db" style="left: 60px; top: 30%"></div>
                         </div>
                         <div id="ball-sprite"></div>
                     </div>
@@ -68,10 +66,6 @@
         <div id="controls">
             <button id="start-game">Start Game</button>
             <button id="read-question">Read Question Again</button>
-        </div>
-
-        <div id="audio-status" style="display: none; text-align: center; margin-top: 10px; padding: 10px; background-color: #fff3cd; color: #856404; border-radius: 4px;">
-            Audio announcements may not be available in your browser. The game will still work without sound.
         </div>
     </div>
 
