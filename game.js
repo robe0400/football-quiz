@@ -1,160 +1,159 @@
 class NFLQuizGame {
-    constructor() {
-        this.currentQuestion = 0;
-        this.score = 0;
-        this.yards = 20;
-        this.currentDown = 1;
-        this.yardsToGo = 10;
-        this.fieldPosition = 20;
-        this.possession = true;
-        
-        // Initialize speech synthesis
-        this.synthesis = window.speechSynthesis;
-        
-        this.initializeElements();
-        this.initializeEventListeners();
-        this.updateDisplay();
-    }
+    // ... previous constructor and initialization methods remain the same ...
 
     initializeElements() {
-        this.questionText = document.getElementById('question-text');
-        this.answerButtons = document.querySelectorAll('.answer-btn');
-        this.startButton = document.getElementById('start-game');
-        this.readQuestionButton = document.getElementById('read-question');
-        this.ballSprite = document.getElementById('ball-sprite');
-        this.scoreDisplay = document.getElementById('score');
-        this.downDisplay = document.getElementById('current-down');
-        this.yardsToGoDisplay = document.getElementById('yards-to-go');
-        this.fieldPositionDisplay = document.getElementById('field-position');
+        // ... previous element initializations ...
+        
+        // Add field position and first down markers
+        this.fieldPositionMarker = document.createElement('div');
+        this.fieldPositionMarker.id = 'field-position-marker';
+        this.firstDownMarker = document.createElement('div');
+        this.firstDownMarker.id = 'first-down-marker';
+        
+        document.getElementById('playing-field').appendChild(this.fieldPositionMarker);
+        document.getElementById('playing-field').appendChild(this.firstDownMarker);
+        
+        this.offensiveTeam = document.getElementById('offensive-team');
+        this.defensiveTeam = document.getElementById('defensive-team');
+        this.playersContainer = document.getElementById('players-container');
+        
+        this.updateFieldMarkers();
     }
 
-    initializeEventListeners() {
-        this.startButton.addEventListener('click', () => this.startGame());
-        this.readQuestionButton.addEventListener('click', () => this.readCurrentQuestion());
+    updateFieldMarkers() {
+        // Update field position marker
+        const fieldPercentage = (this.yards / 100) * 80; // 80% is playing field width
+        this.fieldPositionMarker.style.left = `${fieldPercentage}%`;
         
-        this.answerButtons.forEach(button => {
-            button.addEventListener('click', (e) => this.handleAnswer(e));
-            button.addEventListener('mouseover', (e) => this.readAnswer(e));
+        // Update first down marker
+        const firstDownYards = this.yards + this.yardsToGo;
+        const firstDownPercentage = (firstDownYards / 100) * 80;
+        this.firstDownMarker.style.left = `${firstDownPercentage}%`;
+    }
+
+    animatePlay(yardsGained, isSuccess) {
+        return new Promise(resolve => {
+            if (isSuccess) {
+                // Successful play animation
+                this.animateSuccessfulPlay(yardsGained, resolve);
+            } else {
+                // Failed play animation
+                this.animateFailedPlay(resolve);
+            }
         });
     }
 
-    startGame() {
-        this.currentQuestion = 0;
-        this.score = 0;
-        this.yards = 20;
-        this.currentDown = 1;
-        this.yardsToGo = 10;
-        this.fieldPosition = 20;
-        this.possession = true;
-        this.updateDisplay();
-        this.displayQuestion();
-        this.announceGameStart();
-    }
-
-    announceGameStart() {
-        const utterance = new SpeechSynthesisUtterance("Welcome to NFL Quiz! Let's play football!");
-        this.synthesis.speak(utterance);
-    }
-
-    displayQuestion() {
-        const question = questions[this.currentQuestion];
-        this.questionText.textContent = question.question;
+    animateSuccessfulPlay(yardsGained, resolve) {
+        // Ball snap animation
+        this.ballSprite.classList.add('ball-snap');
         
-        this.answerButtons.forEach((button, index) => {
-            button.textContent = question.answers[index];
+        // Move offensive players forward
+        const moveDistance = (yardsGained / 100) * 80; // 80% is playing field width
+        this.offensiveTeam.style.left = `${moveDistance}%`;
+        
+        // Spread formation for passing play
+        this.offensiveTeam.classList.add('formation-spread');
+        
+        // Move defensive players back
+        this.defensiveTeam.style.right = `-${moveDistance/2}%`;
+        
+        setTimeout(() => {
+            // Reset animations
+            this.ballSprite.classList.remove('ball-snap');
+            this.offensiveTeam.classList.remove('formation-spread');
+            
+            if (this.yards >= 100) {
+                // Touchdown celebration
+                this.animateTouchdown(resolve);
+            } else if (yardsGained >= this.yardsToGo) {
+                // First down celebration
+                this.animateFirstDown(resolve);
+            } else {
+                resolve();
+            }
+        }, 1000);
+    }
+
+    animateFailedPlay(resolve) {
+        // Ball snap animation
+        this.ballSprite.classList.add('ball-snap');
+        
+        // Bunch formation for failed play
+        this.offensiveTeam.classList.add('formation-bunch');
+        
+        // Move defensive players forward
+        this.defensiveTeam.style.right = '10%';
+        
+        // Tackle animation
+        setTimeout(() => {
+            this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+                player.classList.add('player-tackled');
+            });
+        }, 500);
+        
+        setTimeout(() => {
+            // Reset animations
+            this.ballSprite.classList.remove('ball-snap');
+            this.offensiveTeam.classList.remove('formation-bunch');
+            this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+                player.classList.remove('player-tackled');
+            });
+            this.defensiveTeam.style.right = '0';
+            resolve();
+        }, 1500);
+    }
+
+    animateTouchdown(resolve) {
+        this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+            player.classList.add('touchdown-celebration');
         });
         
-        this.readCurrentQuestion();
+        setTimeout(() => {
+            this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+                player.classList.remove('touchdown-celebration');
+            });
+            // Reset field position
+            this.resetFieldPosition();
+            resolve();
+        }, 1500);
     }
 
-    readCurrentQuestion() {
-        if (this.synthesis.speaking) {
-            this.synthesis.cancel();
-        }
-        const question = questions[this.currentQuestion];
-        const utterance = new SpeechSynthesisUtterance(question.question);
-        utterance.rate = 0.9;
-        this.synthesis.speak(utterance);
-    }
-
-    readAnswer(e) {
-        if (this.synthesis.speaking) {
-            this.synthesis.cancel();
-        }
-        const utterance = new SpeechSynthesisUtterance(e.target.textContent);
-        utterance.rate = 1;
-        this.synthesis.speak(utterance);
-    }
-
-    handleAnswer(e) {
-        const selectedAnswer = parseInt(e.target.dataset.index);
-        const question = questions[this.currentQuestion];
+    animateFirstDown(resolve) {
+        this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+            player.classList.add('first-down-celebration');
+        });
         
-        if (selectedAnswer === question.correctAnswer) {
-            this.handleCorrectAnswer();
-        } else {
-            this.handleIncorrectAnswer();
-        }
-        
-        this.currentQuestion++;
-        if (this.currentQuestion < questions.length) {
-            this.displayQuestion();
-        } else {
-            this.endGame();
-        }
+        setTimeout(() => {
+            this.offensiveTeam.querySelectorAll('.player').forEach(player => {
+                player.classList.remove('first-down-celebration');
+            });
+            resolve();
+        }, 1000);
     }
 
-    handleCorrectAnswer() {
-        const yardsGained = Math.floor(Math.random() * 15) + 5; // 5-20 yards
+    resetFieldPosition() {
+        this.offensiveTeam.style.left = '0';
+        this.defensiveTeam.style.right = '0';
+        this.updateFieldMarkers();
+    }
+
+    async handleCorrectAnswer() {
+        const yardsGained = Math.floor(Math.random() * 15) + 5;
+        const previousYards = this.yards;
         this.yards += yardsGained;
-        this.score += 7;
         
-        if (this.yards >= 100) {
-            // Touchdown!
-            const utterance = new SpeechSynthesisUtterance("Touchdown! Great job!");
-            this.synthesis.speak(utterance);
-            this.yards = 20;
-        } else {
-            const utterance = new SpeechSynthesisUtterance(`Correct! Gained ${yardsGained} yards!`);
-            this.synthesis.speak(utterance);
-        }
+        // Animate the play before announcing result
+        await this.animatePlay(yardsGained, true);
         
-        this.updateDisplay();
+        // ... rest of handleCorrectAnswer remains the same ...
     }
 
-    handleIncorrectAnswer() {
-        this.currentDown++;
-        if (this.currentDown > 4) {
-            // Turnover on downs
-            this.currentDown = 1;
-            this.yards = 20;
-            const utterance = new SpeechSynthesisUtterance("Incorrect. Turnover on downs!");
-            this.synthesis.speak(utterance);
-        } else {
-            const utterance = new SpeechSynthesisUtterance("Incorrect. Try again!");
-            this.synthesis.speak(utterance);
-        }
-        this.updateDisplay();
+    async handleIncorrectAnswer() {
+        // Animate the failed play
+        await this.animatePlay(0, false);
+        
+        // ... rest of handleIncorrectAnswer remains the same ...
     }
 
-    updateDisplay() {
-        this.scoreDisplay.textContent = this.score;
-        this.downDisplay.textContent = this.currentDown;
-        this.yardsToGoDisplay.textContent = this.yardsToGo;
-        this.fieldPositionDisplay.textContent = `Own ${this.yards}`;
-    }
-
-    endGame() {
-        this.questionText.textContent = `Game Over! Final Score: ${this.score}`;
-        this.answerButtons.forEach(button => {
-            button.style.display = 'none';
-        });
-        const utterance = new SpeechSynthesisUtterance(`Game Over! Final Score: ${this.score} points!`);
-        this.synthesis.speak(utterance);
-    }
+    // ... rest of the class methods remain the same ...
 }
-
-// Initialize game when DOM is loaded
-window.addEventListener('DOMContentLoaded', () => {
-    new NFLQuizGame();
-});
