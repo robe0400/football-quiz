@@ -46,7 +46,18 @@ class NFLQuizGame {
                     this.checkAnswer(index);
                 }
             });
-        });
+           // Add these lines in the initializeEventListeners method, right after the existing event listeners
+// Around line 49, after the existing button click listeners:
+        // Add mouseover event listeners for answer buttons
+        this.answerButtons.forEach(button => {
+            button.addEventListener('mouseover', () => {
+                // Only read the answer if we're not currently reading the question
+                if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
+                    const answerText = button.textContent;
+                    this.announce(answerText);
+                }
+            });
+        }); });
     }
 
     initializeAnnouncer() {
