@@ -108,20 +108,10 @@ class NFLQuizGame {
             if (callback) callback();
             return;
         }
-
+    
         // Cancel any ongoing speech
         window.speechSynthesis.cancel();
-
-        // For iOS, ensure we're ready to speak
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-            // Force audio context initialization
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            if (AudioContext) {
-                const audioContext = new AudioContext();
-                audioContext.resume().catch(console.error);
-            }
-        }
-
+    
         // Create and configure utterance
         const utterance = new SpeechSynthesisUtterance(text);
         
@@ -129,6 +119,8 @@ class NFLQuizGame {
         if (!this.announcer.voice) {
             const voices = window.speechSynthesis.getVoices();
             this.announcer.voice = voices.find(voice => 
+                voice.lang === 'en-US' && voice.localService
+            ) || voices.find(voice => 
                 voice.lang === 'en-US' || voice.lang === 'en-GB'
             ) || voices[0];
         }
@@ -138,19 +130,19 @@ class NFLQuizGame {
         utterance.rate = 0.9;
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
-
+    
         // Set up event handlers
         utterance.onend = () => {
             this.announcer.isAnnouncing = false;
             if (callback) callback();
         };
-
+    
         utterance.onerror = (event) => {
             console.error('Speech synthesis error:', event);
             this.announcer.isAnnouncing = false;
             if (callback) callback();
         };
-
+    
         // Add a timeout to ensure the speech starts
         const speechTimeout = setTimeout(() => {
             if (this.announcer.isAnnouncing) {
@@ -159,16 +151,27 @@ class NFLQuizGame {
                 window.speechSynthesis.speak(utterance);
             }
         }, 1000);
-
+    
         utterance.onstart = () => {
             clearTimeout(speechTimeout);
         };
-
+    
+        // For iOS, ensure audio is ready
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+            // Touch event might be needed for iOS
+            const touchEvent = document.createEvent('TouchEvent');
+            document.dispatchEvent(touchEvent);
+        }
+    
         // Speak the text
-        window.speechSynthesis.speak(utterance);
-        this.announcer.isAnnouncing = true;
+        try {
+            window.speechSynthesis.speak(utterance);
+            this.announcer.isAnnouncing = true;
+        } catch (error) {
+            console.error('Speech synthesis error:', error);
+            if (callback) callback();
+        }
     }
-
     getGameSituation() {
         let situation = '';
         
