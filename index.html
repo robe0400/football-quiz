@@ -107,5 +107,33 @@
             }
         }, { once: true });
     </script>
+    <script>
+        // Force iOS audio initialization
+        function initAudioForIOS() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            // Initialize speech synthesis
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0;
+            window.speechSynthesis.speak(utterance);
+            window.speechSynthesis.cancel();
+        }
+    
+        // Handle iOS audio initialization
+        document.addEventListener('touchstart', initAudioForIOS, { once: true });
+        
+        // Additional iOS handling for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', (e) => {
+                // Prevent default to avoid double-firing
+                e.preventDefault();
+                // Ensure audio is initialized
+                initAudioForIOS();
+            }, { passive: false });
+        });
+    </script>
 </body>
 </html>

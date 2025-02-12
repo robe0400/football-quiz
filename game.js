@@ -41,7 +41,6 @@ class NFLQuizGame {
         this.readQuestionButton.addEventListener('click', () => this.readCurrentQuestion());
         
         this.answerButtons.forEach(button => {
-            // Click handler for answer selection
             button.addEventListener('click', () => {
                 if (!this.isReadingQuestion) {
                     const index = parseInt(button.dataset.index);
@@ -49,17 +48,12 @@ class NFLQuizGame {
                 }
             });
 
-            // Touch handlers for reading answers
+            // Add touch handlers for reading answers
             button.addEventListener('touchstart', (e) => {
-                // Prevent the default touch behavior
                 e.preventDefault();
-                
-                // Only read if we're not already reading something
                 if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
                     const answerText = button.textContent;
                     this.announce(answerText);
-                    
-                    // Add visual feedback
                     button.classList.add('touch-active');
                 }
             });
@@ -68,7 +62,6 @@ class NFLQuizGame {
                 button.classList.remove('touch-active');
             });
 
-            // Keep existing mouseover handler for desktop users
             button.addEventListener('mouseover', () => {
                 if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
                     const answerText = button.textContent;
@@ -81,101 +74,51 @@ class NFLQuizGame {
     initializeAnnouncer() {
         if (!window.speechSynthesis) {
             console.warn('Speech synthesis not supported in this browser');
-            // Fallback to no audio
-            this.announce = (text, callback) => {
-                console.log('Would speak:', text);
-                if (callback) callback();
-            };
             return;
         }
-    
+
+        // Initialize speech synthesis for iOS
+        const initSpeechForIOS = () => {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance('');
+            utterance.volume = 0;
+            window.speechSynthesis.speak(utterance);
+        };
+
         // Set up voice with proper language settings
         const voicesChanged = () => {
-            const voices = speechSynthesis.getVoices();
-            // First try to find an English US male voice
-            this.announcer.voice = voices.find(voice => 
-                voice.name.includes('Male') && 
-                (voice.lang === 'en-US' || voice.lang === 'en-GB')
-            );
+            const voices = window.speechSynthesis.getVoices();
             
-            // If no male voice found, try any English voice
-            if (!this.announcer.voice) {
-                this.announcer.voice = voices.find(voice => 
-                    voice.lang === 'en-US' || voice.lang === 'en-GB'
-                );
-            }
+            // First try to find an English US voice
+            this.announcer.voice = voices.find(voice => 
+                voice.lang === 'en-US' || voice.lang === 'en-GB'
+            );
             
             // Fallback to any available voice if no English voice found
             if (!this.announcer.voice) {
                 this.announcer.voice = voices[0];
             }
+
+            console.log('Available voices:', voices.map(v => ({ name: v.name, lang: v.lang })));
+            console.log('Selected voice:', this.announcer.voice);
         };
-    
-        speechSynthesis.onvoiceschanged = voicesChanged;
-        voicesChanged();
-    
-        // iOS requires user interaction before playing audio
-        document.addEventListener('touchstart', () => {
-            // Create and play a silent audio context to enable audio
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const silentBuffer = audioContext.createBuffer(1, 1, 22050);
-            const source = audioContext.createBufferSource();
-            source.buffer = silentBuffer;
-            source.connect(audioContext.destination);
-            source.start();
-        }, { once: true });
-    
-        // Handle iOS speech synthesis quirks
+
+        // Handle iOS specific initialization
         if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-            this.announce = (text, callback = null) => {
-                if (!window.speechSynthesis) {
-                    if (callback) callback();
-                    return;
+            document.addEventListener('touchstart', initSpeechForIOS, { once: true });
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    initSpeechForIOS();
                 }
-    
-                if (this.announcer.isAnnouncing) {
-                    speechSynthesis.cancel();
-                }
-    
-                // Force speech synthesis to work on iOS
-                speechSynthesis.cancel();
-                
-                this.announcer.isAnnouncing = true;
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.voice = this.announcer.voice;
-                utterance.lang = 'en-US'; // Force English language
-                utterance.rate = 0.8;
-                utterance.pitch = 0.8;
-    
-                // iOS specific handling
-                utterance.onstart = () => {
-                    // Keep alive for iOS
-                    const keepAlive = setInterval(() => {
-                        speechSynthesis.pause();
-                        speechSynthesis.resume();
-                    }, 14000);
-    
-                    utterance.onend = () => {
-                        clearInterval(keepAlive);
-                        this.announcer.isAnnouncing = false;
-                        if (callback) callback();
-                    };
-    
-                    utterance.onerror = () => {
-                        clearInterval(keepAlive);
-                        this.announcer.isAnnouncing = false;
-                        if (callback) callback();
-                    };
-                };
-    
-                try {
-                    speechSynthesis.speak(utterance);
-                } catch (e) {
-                    console.warn('Speech synthesis failed:', e);
-                    if (callback) callback();
-                }
-            };
+            });
         }
+
+        // Set up voices changed event handler
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+            window.speechSynthesis.onvoiceschanged = voicesChanged;
+        }
+        
+        voicesChanged();
     }
 
     announce(text, callback = null) {
@@ -184,71 +127,72 @@ class NFLQuizGame {
             return;
         }
 
-        if (this.announcer.isAnnouncing) {
-            speechSynthesis.cancel();
-        }
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel();
 
-        // Split text into words and wrap each in a span
-        const words = text.split(' ');
-        const wrappedText = words.map((word, index) => 
-            `<span class="highlighted-word" data-word-index="${index}">${word}</span>`
-        ).join(' ');
+        // Create and configure utterance
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.voice = this.announcer.voice;
+        utterance.lang = 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
-        // If this is a question, update the display with highlighted words
-        if (this.isReadingQuestion) {
-            this.questionText.innerHTML = wrappedText;
+        // Set up event handlers
+        utterance.onend = () => {
+            this.announcer.isAnnouncing = false;
+            if (callback) callback();
+        };
+
+        utterance.onerror = (event) => {
+            console.error('Speech synthesis error:', event);
+            this.announcer.isAnnouncing = false;
+            if (callback) callback();
+        };
+
+        // For iOS, handle speech in chunks
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+            let currentSentence = 0;
+
+            const speakNextSentence = () => {
+                if (currentSentence < sentences.length) {
+                    const sentenceUtterance = new SpeechSynthesisUtterance(sentences[currentSentence]);
+                    sentenceUtterance.voice = this.announcer.voice;
+                    sentenceUtterance.lang = 'en-US';
+                    sentenceUtterance.rate = 0.9;
+                    sentenceUtterance.pitch = 1.0;
+                    sentenceUtterance.volume = 1.0;
+
+                    sentenceUtterance.onend = () => {
+                        currentSentence++;
+                        speakNextSentence();
+                    };
+
+                    sentenceUtterance.onerror = (event) => {
+                        console.error('Speech synthesis error:', event);
+                        currentSentence++;
+                        speakNextSentence();
+                    };
+
+                    window.speechSynthesis.speak(sentenceUtterance);
+                } else {
+                    this.announcer.isAnnouncing = false;
+                    if (callback) callback();
+                }
+            };
+
+            speakNextSentence();
+        } else {
+            window.speechSynthesis.speak(utterance);
         }
 
         this.announcer.isAnnouncing = true;
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.voice = this.announcer.voice;
-        utterance.lang = 'en-US'; // Force English language
-        utterance.rate = 0.8;
-        utterance.pitch = 0.8;
-
-        // Add word boundary event handling
-        let currentWordIndex = -1;
-        utterance.onboundary = (event) => {
-            if (event.name === 'word') {
-                // Remove highlight from previous word
-                if (currentWordIndex >= 0) {
-                    const prevWord = document.querySelector(`[data-word-index="${currentWordIndex}"]`);
-                    if (prevWord) prevWord.classList.remove('current-word');
-                }
-                
-                // Add highlight to current word
-                currentWordIndex++;
-                const currentWord = document.querySelector(`[data-word-index="${currentWordIndex}"]`);
-                if (currentWord) currentWord.classList.add('current-word');
-            }
-        };
-
-        utterance.onend = () => {
-            this.announcer.isAnnouncing = false;
-            // Remove all current-word highlights
-            document.querySelectorAll('.current-word').forEach(el => {
-                el.classList.remove('current-word');
-            });
-            if (callback) callback();
-        };
-
-        utterance.onerror = () => {
-            this.announcer.isAnnouncing = false;
-            if (callback) callback();
-        };
-
-        try {
-            speechSynthesis.speak(utterance);
-        } catch (e) {
-            console.warn('Speech synthesis failed:', e);
-            if (callback) callback();
-        }
     }
 
     getGameSituation() {
         let situation = '';
         
-        // Field position description
         const fieldPosition = this.fieldPosition;
         if (fieldPosition < 50) {
             situation += `at their own ${fieldPosition}`;
@@ -258,7 +202,6 @@ class NFLQuizGame {
             situation += `at the opponent's ${100 - fieldPosition}`;
         }
 
-        // Down and distance
         situation = `${this.getDownString()}, and ${this.yardsToGo} ${this.yardsToGo === 1 ? 'yard' : 'yards'} to go, ${situation}.`;
         
         return situation;
@@ -384,7 +327,6 @@ class NFLQuizGame {
         this.score += 7;
         
         if (this.fieldPosition >= 100) {
-            // Touchdown!
             this.score += 7;
             this.resetDrive();
         } else {
@@ -428,11 +370,8 @@ class NFLQuizGame {
 
     updateTeamPositions() {
         if (this.playersContainer) {
-            // Convert field position to percentage
             let position = this.fieldPosition;
-            // Adjust for the endzones (10% each)
             position = (position / 100) * 80 + 10;
-            // Set the new position with a smooth transition
             this.playersContainer.style.left = `${position}%`;
         }
     }
