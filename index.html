@@ -92,48 +92,66 @@
     <script src="questions.js"></script>
     <script src="game.js"></script>
 
-    <!-- iOS touch handling improvements -->
+    <!-- iOS audio initialization and handling -->
     <script>
+        // Force iOS audio initialization
+        function initAudioForIOS() {
+            // Create and resume audio context
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const audioContext = new AudioContext();
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+            }
+            
+            // Initialize speech synthesis
+            if (window.speechSynthesis) {
+                // Cancel any existing speech
+                window.speechSynthesis.cancel();
+                
+                // Create a short utterance to initialize the system
+                const utterance = new SpeechSynthesisUtterance('');
+                utterance.volume = 0;
+                utterance.onend = () => {
+                    console.log('Speech synthesis initialized');
+                    window.speechSynthesis.cancel(); // Clean up after initialization
+                };
+                utterance.onerror = (e) => {
+                    console.error('Speech synthesis initialization error:', e);
+                };
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        // Add initialization triggers
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize on first touch
+            const initOnTouch = () => {
+                initAudioForIOS();
+                document.removeEventListener('touchstart', initOnTouch);
+            };
+            document.addEventListener('touchstart', initOnTouch);
+            
+            // Initialize on visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    initAudioForIOS();
+                }
+            });
+            
+            // Initialize on any button click
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('touchstart', () => {
+                    initAudioForIOS();
+                }, { once: true });
+            });
+        });
+
         // Prevent double-tap zoom on iOS
         document.addEventListener('touchend', function(event) {
             event.preventDefault();
         }, { passive: false });
-
-        // Enable audio context for iOS
-        document.addEventListener('touchstart', function() {
-            if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
-                const audioContext = new (AudioContext || webkitAudioContext)();
-                audioContext.resume();
-            }
-        }, { once: true });
-    </script>
-    <script>
-        // Force iOS audio initialization
-        function initAudioForIOS() {
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            if (audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            
-            // Initialize speech synthesis
-            const utterance = new SpeechSynthesisUtterance('');
-            utterance.volume = 0;
-            window.speechSynthesis.speak(utterance);
-            window.speechSynthesis.cancel();
-        }
-    
-        // Handle iOS audio initialization
-        document.addEventListener('touchstart', initAudioForIOS, { once: true });
-        
-        // Additional iOS handling for buttons
-        document.querySelectorAll('button').forEach(button => {
-            button.addEventListener('touchstart', (e) => {
-                // Prevent default to avoid double-firing
-                e.preventDefault();
-                // Ensure audio is initialized
-                initAudioForIOS();
-            }, { passive: false });
-        });
     </script>
 </body>
 </html>

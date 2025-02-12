@@ -77,14 +77,6 @@ class NFLQuizGame {
             return;
         }
 
-        // Initialize speech synthesis for iOS
-        const initSpeechForIOS = () => {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance('');
-            utterance.volume = 0;
-            window.speechSynthesis.speak(utterance);
-        };
-
         // Set up voice with proper language settings
         const voicesChanged = () => {
             const voices = window.speechSynthesis.getVoices();
@@ -103,16 +95,6 @@ class NFLQuizGame {
             console.log('Selected voice:', this.announcer.voice);
         };
 
-        // Handle iOS specific initialization
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-            document.addEventListener('touchstart', initSpeechForIOS, { once: true });
-            document.addEventListener('visibilitychange', () => {
-                if (!document.hidden) {
-                    initSpeechForIOS();
-                }
-            });
-        }
-
         // Set up voices changed event handler
         if (window.speechSynthesis.onvoiceschanged !== undefined) {
             window.speechSynthesis.onvoiceschanged = voicesChanged;
@@ -130,8 +112,27 @@ class NFLQuizGame {
         // Cancel any ongoing speech
         window.speechSynthesis.cancel();
 
+        // For iOS, ensure we're ready to speak
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+            // Force audio context initialization
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) {
+                const audioContext = new AudioContext();
+                audioContext.resume().catch(console.error);
+            }
+        }
+
         // Create and configure utterance
         const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Ensure we have a voice selected
+        if (!this.announcer.voice) {
+            const voices = window.speechSynthesis.getVoices();
+            this.announcer.voice = voices.find(voice => 
+                voice.lang === 'en-US' || voice.lang === 'en-GB'
+            ) || voices[0];
+        }
+        
         utterance.voice = this.announcer.voice;
         utterance.lang = 'en-US';
         utterance.rate = 0.9;
@@ -150,43 +151,21 @@ class NFLQuizGame {
             if (callback) callback();
         };
 
-        // For iOS, handle speech in chunks
-        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-            const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-            let currentSentence = 0;
+        // Add a timeout to ensure the speech starts
+        const speechTimeout = setTimeout(() => {
+            if (this.announcer.isAnnouncing) {
+                console.log('Speech timed out, retrying...');
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(utterance);
+            }
+        }, 1000);
 
-            const speakNextSentence = () => {
-                if (currentSentence < sentences.length) {
-                    const sentenceUtterance = new SpeechSynthesisUtterance(sentences[currentSentence]);
-                    sentenceUtterance.voice = this.announcer.voice;
-                    sentenceUtterance.lang = 'en-US';
-                    sentenceUtterance.rate = 0.9;
-                    sentenceUtterance.pitch = 1.0;
-                    sentenceUtterance.volume = 1.0;
+        utterance.onstart = () => {
+            clearTimeout(speechTimeout);
+        };
 
-                    sentenceUtterance.onend = () => {
-                        currentSentence++;
-                        speakNextSentence();
-                    };
-
-                    sentenceUtterance.onerror = (event) => {
-                        console.error('Speech synthesis error:', event);
-                        currentSentence++;
-                        speakNextSentence();
-                    };
-
-                    window.speechSynthesis.speak(sentenceUtterance);
-                } else {
-                    this.announcer.isAnnouncing = false;
-                    if (callback) callback();
-                }
-            };
-
-            speakNextSentence();
-        } else {
-            window.speechSynthesis.speak(utterance);
-        }
-
+        // Speak the text
+        window.speechSynthesis.speak(utterance);
         this.announcer.isAnnouncing = true;
     }
 
