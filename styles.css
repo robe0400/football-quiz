@@ -117,6 +117,7 @@
     background-color: #f0f0f0;
     border-radius: 5px;
     min-height: 50px;
+    line-height: 1.5; /* Added for better readability */
 }
 
 #answers-container {
@@ -173,6 +174,22 @@
     display: none;
 }
 
+/* New styles for word highlighting */
+.highlighted-word {
+    background-color: #FFE44D; /* Child-friendly yellow */
+    border-radius: 4px;
+    padding: 2px 4px;
+    margin: 0 2px;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+
+.current-word {
+    background-color: #7FFF8E; /* Light green when currently being spoken */
+    font-weight: bold;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for better visibility */
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     #answers-container {
@@ -190,5 +207,11 @@
     .answer-btn {
         font-size: 0.9em;
         padding: 10px;
+    }
+
+    /* Adjust highlighting for mobile */
+    .highlighted-word {
+        padding: 1px 3px;
+        margin: 0 1px;
     }
 }

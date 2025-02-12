@@ -46,10 +46,7 @@ class NFLQuizGame {
                     this.checkAnswer(index);
                 }
             });
-           // Add these lines in the initializeEventListeners method, right after the existing event listeners
-// Around line 49, after the existing button click listeners:
-        // Add mouseover event listeners for answer buttons
-        this.answerButtons.forEach(button => {
+            // Add mouseover event listeners for answer buttons
             button.addEventListener('mouseover', () => {
                 // Only read the answer if we're not currently reading the question
                 if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
@@ -57,7 +54,7 @@ class NFLQuizGame {
                     this.announce(answerText);
                 }
             });
-        }); });
+        });
     }
 
     initializeAnnouncer() {
@@ -93,14 +90,46 @@ class NFLQuizGame {
             speechSynthesis.cancel();
         }
 
+        // Split text into words and wrap each in a span
+        const words = text.split(' ');
+        const wrappedText = words.map((word, index) => 
+            `<span class="highlighted-word" data-word-index="${index}">${word}</span>`
+        ).join(' ');
+
+        // If this is a question, update the display with highlighted words
+        if (this.isReadingQuestion) {
+            this.questionText.innerHTML = wrappedText;
+        }
+
         this.announcer.isAnnouncing = true;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.voice = this.announcer.voice;
-        utterance.rate = 0.9; // Slightly slower for clarity
-        utterance.pitch = 0.8; // Deeper voice
+        utterance.rate = 0.8; // Slightly slower for better word tracking
+        utterance.pitch = 0.8;
+
+        // Add word boundary event handling
+        let currentWordIndex = -1;
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                // Remove highlight from previous word
+                if (currentWordIndex >= 0) {
+                    const prevWord = document.querySelector(`[data-word-index="${currentWordIndex}"]`);
+                    if (prevWord) prevWord.classList.remove('current-word');
+                }
+                
+                // Add highlight to current word
+                currentWordIndex++;
+                const currentWord = document.querySelector(`[data-word-index="${currentWordIndex}"]`);
+                if (currentWord) currentWord.classList.add('current-word');
+            }
+        };
 
         utterance.onend = () => {
             this.announcer.isAnnouncing = false;
+            // Remove all current-word highlights
+            document.querySelectorAll('.current-word').forEach(el => {
+                el.classList.remove('current-word');
+            });
             if (callback) callback();
         };
 
@@ -176,14 +205,14 @@ class NFLQuizGame {
         }
 
         const question = questions[this.currentQuestion];
-        this.questionText.textContent = question.question;
+        // Don't set textContent directly anymore, as we'll use innerHTML with highlights
+        this.questionText.innerHTML = question.question;
         
         question.answers.forEach((answer, index) => {
             this.answerButtons[index].textContent = answer;
             this.answerButtons[index].disabled = false;
         });
 
-        // Read the question after announcing the game situation
         this.readCurrentQuestion();
     }
 
