@@ -39,16 +39,37 @@ class NFLQuizGame {
     initializeEventListeners() {
         this.startButton.addEventListener('click', () => this.startGame());
         this.readQuestionButton.addEventListener('click', () => this.readCurrentQuestion());
+        
         this.answerButtons.forEach(button => {
+            // Click handler for answer selection
             button.addEventListener('click', () => {
                 if (!this.isReadingQuestion) {
                     const index = parseInt(button.dataset.index);
                     this.checkAnswer(index);
                 }
             });
-            // Add mouseover event listeners for answer buttons
+
+            // Touch handlers for reading answers
+            button.addEventListener('touchstart', (e) => {
+                // Prevent the default touch behavior
+                e.preventDefault();
+                
+                // Only read if we're not already reading something
+                if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
+                    const answerText = button.textContent;
+                    this.announce(answerText);
+                    
+                    // Add visual feedback
+                    button.classList.add('touch-active');
+                }
+            });
+
+            button.addEventListener('touchend', () => {
+                button.classList.remove('touch-active');
+            });
+
+            // Keep existing mouseover handler for desktop users
             button.addEventListener('mouseover', () => {
-                // Only read the answer if we're not currently reading the question
                 if (!this.isReadingQuestion && !this.announcer.isAnnouncing) {
                     const answerText = button.textContent;
                     this.announce(answerText);
@@ -56,6 +77,7 @@ class NFLQuizGame {
             });
         });
     }
+
     initializeAnnouncer() {
         if (!window.speechSynthesis) {
             console.warn('Speech synthesis not supported in this browser');
@@ -67,10 +89,26 @@ class NFLQuizGame {
             return;
         }
     
-        // Set up a deeper voice for the announcer if available
+        // Set up voice with proper language settings
         const voicesChanged = () => {
             const voices = speechSynthesis.getVoices();
-            this.announcer.voice = voices.find(voice => voice.name.includes('Male')) || voices[0];
+            // First try to find an English US male voice
+            this.announcer.voice = voices.find(voice => 
+                voice.name.includes('Male') && 
+                (voice.lang === 'en-US' || voice.lang === 'en-GB')
+            );
+            
+            // If no male voice found, try any English voice
+            if (!this.announcer.voice) {
+                this.announcer.voice = voices.find(voice => 
+                    voice.lang === 'en-US' || voice.lang === 'en-GB'
+                );
+            }
+            
+            // Fallback to any available voice if no English voice found
+            if (!this.announcer.voice) {
+                this.announcer.voice = voices[0];
+            }
         };
     
         speechSynthesis.onvoiceschanged = voicesChanged;
@@ -105,6 +143,7 @@ class NFLQuizGame {
                 this.announcer.isAnnouncing = true;
                 const utterance = new SpeechSynthesisUtterance(text);
                 utterance.voice = this.announcer.voice;
+                utterance.lang = 'en-US'; // Force English language
                 utterance.rate = 0.8;
                 utterance.pitch = 0.8;
     
@@ -163,7 +202,8 @@ class NFLQuizGame {
         this.announcer.isAnnouncing = true;
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.voice = this.announcer.voice;
-        utterance.rate = 0.8; // Slightly slower for better word tracking
+        utterance.lang = 'en-US'; // Force English language
+        utterance.rate = 0.8;
         utterance.pitch = 0.8;
 
         // Add word boundary event handling
@@ -264,7 +304,6 @@ class NFLQuizGame {
         }
 
         const question = questions[this.currentQuestion];
-        // Don't set textContent directly anymore, as we'll use innerHTML with highlights
         this.questionText.innerHTML = question.question;
         
         question.answers.forEach((answer, index) => {
@@ -320,7 +359,6 @@ class NFLQuizGame {
         const isCorrect = answerIndex === question.correctAnswer;
         const yardsGained = isCorrect ? 10 : 0;
 
-        // Announce the result of the play
         this.announce(this.announcePlayResult(isCorrect, yardsGained), () => {
             if (isCorrect) {
                 this.handleCorrectAnswer();
@@ -330,7 +368,6 @@ class NFLQuizGame {
 
             this.currentQuestion++;
             
-            // After a short delay, announce the new game situation and display the next question
             setTimeout(() => {
                 if (this.currentQuestion < questions.length) {
                     this.announceGameSituation(() => {
@@ -342,7 +379,6 @@ class NFLQuizGame {
     }
 
     handleCorrectAnswer() {
-        // Gain yards
         this.yards += 10;
         this.fieldPosition += 10;
         this.score += 7;

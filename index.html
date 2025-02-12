@@ -5,41 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="An interactive NFL Quiz game for kids with accessible touch controls and voice feedback">
     <title>NFL Quiz for Kids</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-container">
-        <div id="field-container">
+    <div id="game-container" role="main">
+        <div id="field-container" aria-label="Football field visualization">
             <div id="football-field">
                 <div id="endzone-left" class="endzone">
                     <div class="endzone-text">END ZONE</div>
                 </div>
                 <div id="playing-field">
-                    <div class="yard-line" style="left: 10%"><span>10</span></div>
-                    <div class="yard-line" style="left: 20%"><span>20</span></div>
-                    <div class="yard-line" style="left: 30%"><span>30</span></div>
-                    <div class="yard-line" style="left: 40%"><span>40</span></div>
-                    <div class="yard-line" style="left: 50%"><span>50</span></div>
-                    <div class="yard-line" style="left: 60%"><span>40</span></div>
-                    <div class="yard-line" style="left: 70%"><span>30</span></div>
-                    <div class="yard-line" style="left: 80%"><span>20</span></div>
-                    <div class="yard-line" style="left: 90%"><span>10</span></div>
+                    <div class="yard-line" style="left: 10%" aria-label="10 yard line"><span>10</span></div>
+                    <div class="yard-line" style="left: 20%" aria-label="20 yard line"><span>20</span></div>
+                    <div class="yard-line" style="left: 30%" aria-label="30 yard line"><span>30</span></div>
+                    <div class="yard-line" style="left: 40%" aria-label="40 yard line"><span>40</span></div>
+                    <div class="yard-line" style="left: 50%" aria-label="50 yard line"><span>50</span></div>
+                    <div class="yard-line" style="left: 60%" aria-label="40 yard line"><span>40</span></div>
+                    <div class="yard-line" style="left: 70%" aria-label="30 yard line"><span>30</span></div>
+                    <div class="yard-line" style="left: 80%" aria-label="20 yard line"><span>20</span></div>
+                    <div class="yard-line" style="left: 90%" aria-label="10 yard line"><span>10</span></div>
 
                     <div id="players-container">
-                        <div id="offensive-team">
-                            <div class="player offense-qb" style="left: 0; top: 50%"></div>
-                            <div class="player offense-rb" style="left: -10px; top: 60%"></div>
-                            <div class="player offense-wr" style="left: 20px; top: 20%"></div>
-                            <div class="player offense-ol" style="left: -5px; top: 40%"></div>
-                            <div class="player offense-ol" style="left: -5px; top: 60%"></div>
+                        <div id="offensive-team" aria-label="Offensive team">
+                            <div class="player offense-qb" style="left: 0; top: 50%" aria-label="Quarterback"></div>
+                            <div class="player offense-rb" style="left: -10px; top: 60%" aria-label="Running back"></div>
+                            <div class="player offense-wr" style="left: 20px; top: 20%" aria-label="Wide receiver"></div>
+                            <div class="player offense-ol" style="left: -5px; top: 40%" aria-label="Offensive lineman"></div>
+                            <div class="player offense-ol" style="left: -5px; top: 60%" aria-label="Offensive lineman"></div>
                         </div>
-                        <div id="defensive-team">
-                            <div class="player defense-dl" style="left: 30px; top: 45%"></div>
-                            <div class="player defense-lb" style="left: 45px; top: 50%"></div>
-                            <div class="player defense-db" style="left: 60px; top: 30%"></div>
+                        <div id="defensive-team" aria-label="Defensive team">
+                            <div class="player defense-dl" style="left: 30px; top: 45%" aria-label="Defensive lineman"></div>
+                            <div class="player defense-lb" style="left: 45px; top: 50%" aria-label="Linebacker"></div>
+                            <div class="player defense-db" style="left: 60px; top: 30%" aria-label="Defensive back"></div>
                         </div>
-                        <div id="ball-sprite"></div>
+                        <div id="ball-sprite" aria-label="Football"></div>
                     </div>
                 </div>
                 <div id="endzone-right" class="endzone">
@@ -47,31 +48,64 @@
                 </div>
             </div>
             
-            <div id="scoreboard">
-                <div>Down: <span id="current-down">1</span></div>
-                <div>To Go: <span id="yards-to-go">10</span></div>
-                <div>Score: <span id="score">0</span></div>
-                <div>Ball on: <span id="field-position">Own 20</span></div>
+            <div id="scoreboard" role="region" aria-label="Game status">
+                <div>Down: <span id="current-down" aria-live="polite">1</span></div>
+                <div>To Go: <span id="yards-to-go" aria-live="polite">10</span></div>
+                <div>Score: <span id="score" aria-live="polite">0</span></div>
+                <div>Ball on: <span id="field-position" aria-live="polite">Own 20</span></div>
             </div>
         </div>
 
-        <div id="question-container">
-            <div id="question-text"></div>
-            <div id="answers-container">
-                <button class="answer-btn" data-index="0"></button>
-                <button class="answer-btn" data-index="1"></button>
-                <button class="answer-btn" data-index="2"></button>
-                <button class="answer-btn" data-index="3"></button>
+        <div id="question-container" role="region" aria-label="Quiz section">
+            <div id="question-text" aria-live="polite" role="heading" aria-level="1"></div>
+            <div id="answers-container" role="group" aria-label="Answer options">
+                <button class="answer-btn" 
+                        data-index="0" 
+                        aria-label="Touch to hear answer option 1" 
+                        role="button">
+                </button>
+                <button class="answer-btn" 
+                        data-index="1" 
+                        aria-label="Touch to hear answer option 2" 
+                        role="button">
+                </button>
+                <button class="answer-btn" 
+                        data-index="2" 
+                        aria-label="Touch to hear answer option 3" 
+                        role="button">
+                </button>
+                <button class="answer-btn" 
+                        data-index="3" 
+                        aria-label="Touch to hear answer option 4" 
+                        role="button">
+                </button>
             </div>
         </div>
 
-        <div id="controls">
-            <button id="start-game">Start Game</button>
-            <button id="read-question">Read Question Again</button>
+        <div id="controls" role="region" aria-label="Game controls">
+            <button id="start-game" aria-label="Start or restart the game">Start Game</button>
+            <button id="read-question" aria-label="Hear the current question again">Read Question Again</button>
         </div>
     </div>
 
+    <!-- Load game data and scripts -->
     <script src="questions.js"></script>
     <script src="game.js"></script>
+
+    <!-- iOS touch handling improvements -->
+    <script>
+        // Prevent double-tap zoom on iOS
+        document.addEventListener('touchend', function(event) {
+            event.preventDefault();
+        }, { passive: false });
+
+        // Enable audio context for iOS
+        document.addEventListener('touchstart', function() {
+            if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                const audioContext = new (AudioContext || webkitAudioContext)();
+                audioContext.resume();
+            }
+        }, { once: true });
+    </script>
 </body>
 </html>

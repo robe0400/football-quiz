@@ -1,74 +1,106 @@
-/* Base styles and iOS optimizations */
-* {
-    -webkit-tap-highlight-color: transparent;
-    -webkit-touch-callout: none;
+:root {
+    --field-green: #355e3b;
+    --dark-green: #234024;
+    --white: #ffffff;
+    --goal-yellow: #ffd700;
 }
 
-html {
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: var(--dark-green);
+    color: var(--white);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding: 20px;
+    touch-action: manipulation;
 }
 
 #game-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+#field-container {
+    width: 100%;
+    position: relative;
+    margin-bottom: 20px;
 }
 
 #football-field {
     width: 100%;
-    height: 300px;
-    background-color: #4CAF50;
+    height: 200px;
+    background-color: var(--field-green);
+    border: 2px solid var(--white);
+    border-radius: 10px;
     position: relative;
-    display: flex;
-    margin-bottom: 20px;
     overflow: hidden;
 }
 
 .endzone {
     width: 10%;
     height: 100%;
-    background-color: #3d8b40;
-    position: relative;
+    background-color: var(--dark-green);
+    position: absolute;
+    top: 0;
 }
 
 #endzone-left {
-    border-right: 2px solid white;
+    left: 0;
 }
 
 #endzone-right {
-    border-left: 2px solid white;
+    right: 0;
 }
 
 .endzone-text {
-    color: white;
-    transform: rotate(-90deg);
+    color: var(--white);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
     position: absolute;
     top: 50%;
     left: 50%;
-    transform-origin: 0 0;
-    white-space: nowrap;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    opacity: 0.7;
 }
 
 #playing-field {
+    position: absolute;
+    left: 10%;
     width: 80%;
     height: 100%;
-    position: relative;
 }
 
 .yard-line {
     position: absolute;
-    width: 2px;
     height: 100%;
-    background-color: white;
+    width: 2px;
+    background-color: var(--white);
+    opacity: 0.5;
 }
 
 .yard-line span {
     position: absolute;
-    top: 5px;
+    bottom: 5px;
     left: 5px;
-    color: white;
     font-size: 12px;
+    color: var(--white);
+    opacity: 0.7;
 }
 
 #players-container {
@@ -76,124 +108,136 @@ html {
     left: 20%;
     width: 100px;
     height: 100%;
-    transition: left 0.5s ease;
+    transition: left 0.5s ease-out;
 }
 
 .player {
     width: 10px;
     height: 10px;
-    background-color: white;
+    background-color: var(--white);
     border-radius: 50%;
     position: absolute;
     transform: translate(-50%, -50%);
 }
 
-#offensive-team .player {
-    background-color: #ff4444;
-}
-
-#defensive-team .player {
-    background-color: #4444ff;
-}
-
 #ball-sprite {
     width: 8px;
-    height: 12px;
-    background-color: brown;
+    height: 4px;
+    background-color: var(--goal-yellow);
+    border-radius: 2px;
     position: absolute;
     left: 0;
     top: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%);
 }
 
 #scoreboard {
-    background-color: #333;
-    color: white;
+    background-color: rgba(0, 0, 0, 0.5);
     padding: 10px;
-    display: flex;
-    justify-content: space-around;
-    margin-bottom: 20px;
     border-radius: 5px;
-    font-size: 1.1em;
-    -webkit-overflow-scrolling: touch;
-    overflow-x: auto;
+    display: flex;
+    gap: 20px;
+    font-size: 14px;
+    position: absolute;
+    bottom: -40px;
+    left: 50%;
+    transform: translateX(-50%);
     white-space: nowrap;
 }
 
 #question-container {
+    width: 100%;
+    text-align: center;
     margin-bottom: 20px;
-    -webkit-overflow-scrolling: touch;
-    overflow-y: auto;
 }
 
 #question-text {
     font-size: 1.2em;
-    margin-bottom: 15px;
-    padding: 10px;
-    background-color: #f0f0f0;
-    border-radius: 5px;
-    min-height: 50px;
-    line-height: 1.5;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    margin-bottom: 20px;
+    line-height: 1.4;
 }
 
 #answers-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .answer-btn {
-    -webkit-appearance: none;
-    appearance: none;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--white);
+    color: var(--white);
     padding: 15px;
-    font-size: 1em;
-    border: 2px solid #4CAF50;
-    background-color: white;
     border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
+    font-size: 1em;
+    transition: all 0.2s ease-in-out;
+    position: relative;
     min-height: 60px;
-    display: block;
-    -webkit-user-select: none;
-    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .answer-btn:hover {
-    background-color: #e8f5e9;
-    transform: scale(1.02);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 .answer-btn:active {
+    transform: translateY(1px);
+}
+
+.answer-btn.touch-active {
     transform: scale(0.98);
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--goal-yellow);
+}
+
+.answer-btn::before {
+    content: "Touch to hear this answer";
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
 }
 
 #controls {
+    width: 100%;
     display: flex;
-    gap: 10px;
     justify-content: center;
+    gap: 10px;
     margin-top: 20px;
 }
 
-#controls button {
-    -webkit-appearance: none;
-    appearance: none;
-    padding: 10px 20px;
-    font-size: 1em;
-    background-color: #4CAF50;
-    color: white;
+#start-game, #read-question {
+    background-color: var(--goal-yellow);
+    color: var(--dark-green);
     border: none;
+    padding: 10px 20px;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    -webkit-user-select: none;
-    user-select: none;
+    font-size: 1em;
+    font-weight: bold;
+    transition: all 0.2s ease;
 }
 
-#controls button:hover {
-    background-color: #45a049;
+#start-game:hover, #read-question:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#start-game:active, #read-question:active {
+    transform: translateY(1px);
 }
 
 #read-question {
@@ -202,93 +246,69 @@ html {
 
 /* Word highlighting styles */
 .highlighted-word {
-    background-color: #FFE44D;
-    border-radius: 4px;
-    padding: 2px 4px;
-    margin: 0 2px;
-    display: inline-block;
-    transition: background-color 0.3s;
+    display: inline;
+    padding: 0 2px;
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
 }
 
 .current-word {
-    background-color: #7FFF8E;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background-color: rgba(255, 215, 0, 0.3);
 }
 
-/* iOS-specific styles */
-@supports (-webkit-touch-callout: none) {
-    #game-container {
-        position: fixed;
-        width: 100%;
-        height: 100%;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .answer-btn {
-        min-height: 44px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-
-    #controls button {
-        min-height: 44px;
-        min-width: 44px;
-        padding: 12px 24px;
-    }
-
-    #question-text, .answer-btn, #controls button {
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-    }
-}
-
-/* Safe area insets support */
-@supports (padding: max(0px)) {
-    #game-container {
-        padding-left: max(20px, env(safe-area-inset-left));
-        padding-right: max(20px, env(safe-area-inset-right));
-        padding-bottom: max(20px, env(safe-area-inset-bottom));
-    }
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
+/* Mobile optimizations */
+@media (max-width: 600px) {
     #answers-container {
         grid-template-columns: 1fr;
     }
-    
-    #football-field {
-        height: 200px;
-    }
-    
-    #question-text {
-        font-size: 1.1em;
-    }
-    
+
     .answer-btn {
+        padding: 12px;
         font-size: 0.9em;
-        padding: 10px;
     }
 
-    .highlighted-word {
-        padding: 1px 3px;
-        margin: 0 1px;
+    #question-text {
+        font-size: 1em;
     }
 
-    @supports (-webkit-touch-callout: none) {
-        #football-field {
-            height: 180px;
-        }
+    #scoreboard {
+        font-size: 12px;
+        gap: 10px;
+    }
 
-        #scoreboard {
-            font-size: 0.9em;
-            padding: 8px;
-        }
+    #football-field {
+        height: 150px;
+    }
+}
 
-        .yard-line span {
-            font-size: 10px;
-        }
+/* Accessibility improvements */
+.answer-btn:focus {
+    outline: 3px solid var(--goal-yellow);
+    outline-offset: -3px;
+}
+
+/* Prevent text selection during touch interactions */
+.answer-btn {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+    .answer-btn {
+        border: 2px solid ButtonText;
+    }
+    
+    .answer-btn.touch-active {
+        border-color: Highlight;
+    }
+}
+
+/* Reduce motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .answer-btn, #players-container {
+        transition: none;
     }
 }
