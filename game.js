@@ -56,7 +56,6 @@ class NFLQuizGame {
             });
         });
     }
-
     initializeAnnouncer() {
         if (!window.speechSynthesis) {
             console.warn('Speech synthesis not supported in this browser');
@@ -67,17 +66,77 @@ class NFLQuizGame {
             };
             return;
         }
-
+    
         // Set up a deeper voice for the announcer if available
         const voicesChanged = () => {
             const voices = speechSynthesis.getVoices();
             this.announcer.voice = voices.find(voice => voice.name.includes('Male')) || voices[0];
         };
-
+    
         speechSynthesis.onvoiceschanged = voicesChanged;
-        
-        // Initial voice load
         voicesChanged();
+    
+        // iOS requires user interaction before playing audio
+        document.addEventListener('touchstart', () => {
+            // Create and play a silent audio context to enable audio
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const silentBuffer = audioContext.createBuffer(1, 1, 22050);
+            const source = audioContext.createBufferSource();
+            source.buffer = silentBuffer;
+            source.connect(audioContext.destination);
+            source.start();
+        }, { once: true });
+    
+        // Handle iOS speech synthesis quirks
+        if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+            this.announce = (text, callback = null) => {
+                if (!window.speechSynthesis) {
+                    if (callback) callback();
+                    return;
+                }
+    
+                if (this.announcer.isAnnouncing) {
+                    speechSynthesis.cancel();
+                }
+    
+                // Force speech synthesis to work on iOS
+                speechSynthesis.cancel();
+                
+                this.announcer.isAnnouncing = true;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.voice = this.announcer.voice;
+                utterance.rate = 0.8;
+                utterance.pitch = 0.8;
+    
+                // iOS specific handling
+                utterance.onstart = () => {
+                    // Keep alive for iOS
+                    const keepAlive = setInterval(() => {
+                        speechSynthesis.pause();
+                        speechSynthesis.resume();
+                    }, 14000);
+    
+                    utterance.onend = () => {
+                        clearInterval(keepAlive);
+                        this.announcer.isAnnouncing = false;
+                        if (callback) callback();
+                    };
+    
+                    utterance.onerror = () => {
+                        clearInterval(keepAlive);
+                        this.announcer.isAnnouncing = false;
+                        if (callback) callback();
+                    };
+                };
+    
+                try {
+                    speechSynthesis.speak(utterance);
+                } catch (e) {
+                    console.warn('Speech synthesis failed:', e);
+                    if (callback) callback();
+                }
+            };
+        }
     }
 
     announce(text, callback = null) {

@@ -1,3 +1,14 @@
+/* Base styles and iOS optimizations */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
 #game-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -104,10 +115,15 @@
     margin-bottom: 20px;
     border-radius: 5px;
     font-size: 1.1em;
+    -webkit-overflow-scrolling: touch;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 #question-container {
     margin-bottom: 20px;
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
 }
 
 #question-text {
@@ -117,7 +133,9 @@
     background-color: #f0f0f0;
     border-radius: 5px;
     min-height: 50px;
-    line-height: 1.5; /* Added for better readability */
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 #answers-container {
@@ -127,6 +145,8 @@
 }
 
 .answer-btn {
+    -webkit-appearance: none;
+    appearance: none;
     padding: 15px;
     font-size: 1em;
     border: 2px solid #4CAF50;
@@ -136,6 +156,8 @@
     transition: all 0.3s ease;
     min-height: 60px;
     display: block;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .answer-btn:hover {
@@ -156,6 +178,8 @@
 }
 
 #controls button {
+    -webkit-appearance: none;
+    appearance: none;
     padding: 10px 20px;
     font-size: 1em;
     background-color: #4CAF50;
@@ -164,6 +188,8 @@
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 #controls button:hover {
@@ -174,9 +200,9 @@
     display: none;
 }
 
-/* New styles for word highlighting */
+/* Word highlighting styles */
 .highlighted-word {
-    background-color: #FFE44D; /* Child-friendly yellow */
+    background-color: #FFE44D;
     border-radius: 4px;
     padding: 2px 4px;
     margin: 0 2px;
@@ -185,9 +211,46 @@
 }
 
 .current-word {
-    background-color: #7FFF8E; /* Light green when currently being spoken */
+    background-color: #7FFF8E;
     font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for better visibility */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* iOS-specific styles */
+@supports (-webkit-touch-callout: none) {
+    #game-container {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .answer-btn {
+        min-height: 44px;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+
+    #controls button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 12px 24px;
+    }
+
+    #question-text, .answer-btn, #controls button {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Safe area insets support */
+@supports (padding: max(0px)) {
+    #game-container {
+        padding-left: max(20px, env(safe-area-inset-left));
+        padding-right: max(20px, env(safe-area-inset-right));
+        padding-bottom: max(20px, env(safe-area-inset-bottom));
+    }
 }
 
 /* Responsive design */
@@ -209,9 +272,23 @@
         padding: 10px;
     }
 
-    /* Adjust highlighting for mobile */
     .highlighted-word {
         padding: 1px 3px;
         margin: 0 1px;
+    }
+
+    @supports (-webkit-touch-callout: none) {
+        #football-field {
+            height: 180px;
+        }
+
+        #scoreboard {
+            font-size: 0.9em;
+            padding: 8px;
+        }
+
+        .yard-line span {
+            font-size: 10px;
+        }
     }
 }
